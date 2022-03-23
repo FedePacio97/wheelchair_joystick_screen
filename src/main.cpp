@@ -335,6 +335,8 @@ void TaskHandleScreen(void *pvParameters)  // This is a task.
         #if DEBUG_LEVEL > 1
         Serial.printf("stability -> pitch %d\n",stability_info.pitch);
         Serial.printf("stability -> roll %d\n",stability_info.roll);
+
+        Serial.printf("stability -> acc_x %f\n",stability_info.accel_x);
         #endif
 
         screen.set_pitch(stability_info.pitch);
