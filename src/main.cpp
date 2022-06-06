@@ -53,6 +53,10 @@ QueueHandle_t xTelemetry_From_ECU_Queue = NULL;
 /* Queue used to receive Stabiity messages from ECU. */
 QueueHandle_t xStability_Info_From_ECU_Queue = NULL;
 
+//Used to access stability_info_updates
+SemaphoreHandle_t xSemaphore_mutex_stability_info_updates;
+Stability_message stability_info_updates = {0};
+
 // the setup function runs once when you press reset or power the board
 void setup() {
   
@@ -67,9 +71,9 @@ void setup() {
   WiFi.mode(WIFI_MODE_STA);
   delay(10);
 
-  //#if DEBUG_LEVEL > 1
+  #if DEBUG_LEVEL > 1
   Serial.println(WiFi.macAddress());
-  //#endif
+  #endif
 
   // Init ESP-NOW
   if (esp_now_init() != ESP_OK) {
@@ -124,6 +128,16 @@ void setup() {
                          // Size of each item is big enough to hold the
                          //whole structure.
                          sizeof( Stability_message ) );
+
+
+  xSemaphore_mutex_stability_info_updates = xSemaphoreCreateMutex();
+  
+  if( xSemaphore_mutex_stability_info_updates == NULL )
+  {
+      // The semaphore wasn't created successfully
+      //buzz();
+      //abort
+  }
 
 
   //Initilize Nextion screen
@@ -224,10 +238,17 @@ void TaskHandleJoystick(void *pvParameters)  // This is a task.
   Attach the center pin of a potentiometer to pin XX, and the outside pins to +5V and ground. (The same for YY)
 
 */
+  Stability_message stability_message_received_from_BLE = {0};
   for (;;)
   {
 
-        ecu.update_RPM_reference_rear_wheels();
+      //Retrieve stability_message_received_from_BLE
+      //Protect by mutex
+      xSemaphoreTake( xSemaphore_mutex_stability_info_updates, portMAX_DELAY );
+      stability_message_received_from_BLE = stability_info_updates;
+      xSemaphoreGive( xSemaphore_mutex_stability_info_updates );
+
+      ecu.update_RPM_reference_rear_wheels(stability_message_received_from_BLE);
         //ecu.update_wheelchair_reference_speed();
       //float reference_linear_speed = ecu.get_reference_linear_speed();
       //float reference_angular_speed = ecu.get_reference_angular_speed();
@@ -273,7 +294,7 @@ void TaskHandleJoystick(void *pvParameters)  // This is a task.
     int sensorValueA3 = analogRead(A3);
     // print out the value you read:
     Serial.println(sensorValueA3);*/
-    vTaskDelay(25/portTICK_PERIOD_MS);  // 50ms delay == 1/(50 * 10^-3) = 100Hz
+    vTaskDelay(15/portTICK_PERIOD_MS);  // 50ms delay == 1/(50 * 10^-3) = 100Hz
   }
 }
 
@@ -332,13 +353,20 @@ void TaskHandleScreen(void *pvParameters)  // This is a task.
                         0 ) == pdPASS)
       {
         //Send to Screen
-        #if DEBUG_LEVEL > 1
+        //#if DEBUG_LEVEL > 1
         Serial.printf("stability -> pitch %d\n",stability_info.pitch);
         Serial.printf("stability -> roll %d\n",stability_info.roll);
-        #endif
 
+        Serial.printf("stability -> accX %f\t accY %f \t accZ %f\n",stability_info.accel_x, stability_info.accel_y, stability_info.accel_z);
+        Serial.printf("stability -> gyroX %f\t gyroY %f \t gyroZ %f \n",stability_info.gyro_x, stability_info.gyro_y, stability_info.gyro_z);
+        Serial.printf("stability -> magX %f\t magY %f \t magZ %f\n",stability_info.mag_x, stability_info.mag_y, stability_info.mag_z);
+        //#endif
         screen.set_pitch(stability_info.pitch);
         screen.set_roll(stability_info.roll);
+
+        xSemaphoreTake( xSemaphore_mutex_stability_info_updates, portMAX_DELAY );
+        stability_info_updates = stability_info;
+        xSemaphoreGive( xSemaphore_mutex_stability_info_updates );
         
       }
     }
@@ -446,12 +474,12 @@ void TaskCheckAlivenessEngineCU(void *pvParameters)  // This is a task.
 {
   (void) pvParameters;
   
-  /*
+  
   TaskCheckAlivenessEngineCU
   Used to check if within interfaceEngineCU_ECU.KEEP_ALIVE_PERIOD_ms at least a mex has been received from the EngineCU: if not so, something wrong is happening
   so enable security_stop_procedure
 
-  */
+*/  
 /*
   TickType_t xLastWakeTime;
   // Initialise the xLastWakeTime variable with the current time.

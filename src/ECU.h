@@ -1,5 +1,6 @@
 #include<Arduino.h>
 #include"Joystick.h"
+#include"messages.h"
 #ifndef ECU_h
 #define ECU_h
 
@@ -52,7 +53,7 @@ class ECU {
     void update_wheelchair_reference_speed();
     void update_RPM_reference_rear_wheels_old();
 
-    void update_RPM_reference_rear_wheels();
+    void update_RPM_reference_rear_wheels(Stability_message&);
     //void update_reference_RPM_rear_wheels();
     int get_reference_RPM_lx();
     int get_reference_RPM_rx();
