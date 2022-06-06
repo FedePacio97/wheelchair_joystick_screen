@@ -23,7 +23,7 @@ void Screen::adjust_speed_profile(int increment){
   //Update text label
   profile_text.setValue(current_speed_profile);
 
-  //Update ECU "MAX_RPM"
+  //Update ECU "MAX_CURRENT"
   ECU::set_level_speed_profile(current_speed_profile);
 
   //Update gauge image

@@ -27,7 +27,7 @@ extern uint8_t joystick_controller_MAC[];// = {0x7C, 0x9E, 0xBD, 0x39, 0x25, 0x6
 #define SCREEN_DATA_OPCODE 1
 
 //from joystick to engineCU
-#define RPM_REFERENCE_OPCODE 10 // RPM_LX | RPM_RX
+#define CURRENT_REFERENCE_OPCODE 10 // CURRENT_LX | CURRENT_RX
 
 //from engineCU to joystick
 #define TELEMETRY_OPCODE 20 // VESC_SIDE [LX,RX] | TelemetryInfo telemetry_info
@@ -62,11 +62,11 @@ struct Message_received_on_BLE {
 };
 
 struct RPM_message {
-    int RPM_LX;
-    int RPM_RX;
+    float CURRENT_LX;
+    float CURRENT_RX;
 };
 
-struct RPM_message_sent_on_BLE{
+struct CURRENT_message_sent_on_BLE{
     uint8_t OPCODE;
     RPM_message rpm;
 };

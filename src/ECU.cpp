@@ -4,51 +4,53 @@
 
 #define DEBUG_LEVEL 0
 
-int ECU::MAX_RPM = 2000;
+//int ECU::MAX_CURRENT = 2000;
+
+float ECU::MAX_CURRENT = 15.0;
 
             //Initialization list
 ECU::ECU() : joystick(JOYSTICK_Y_PIN,JOYSTICK_X_PIN) /*, Accelerometer(), [...] */{
   angular_speed_rear_wheels.omega_left = angular_speed_rear_wheels.omega_right = 0;
   wheelchair_reference_speed.angular = wheelchair_reference_speed.linear = 0;
-  reference_RPM_rear_wheels.RPM_lx = reference_RPM_rear_wheels.RPM_rx = 0;
-  //MAX_RPM = DEFAULT_MAX_RPM;
+  reference_CURRENT_rear_wheels.CURRENT_lx = reference_CURRENT_rear_wheels.CURRENT_rx = 0;
+  //MAX_CURRENT = DEFAULT_MAX_CURRENT;
 }
 
 /*
-void ECU::update_reference_RPM_rear_wheels(){
+void ECU::update_reference_CURRENT_rear_wheels(){
   joystick.update_charthesian_coordinates();
   int degree = joystick.get_discretized_degree();
   float module = joystick.get_module();
   
   if(degree >= 0 && degree <=90 ){ //QUADRANT 1 [0,90] 
-    reference_RPM_rear_wheels.RPM_rx = module * map(degree, 0, 90, -1 * MAX_RPM, MAX_RPM );
-    reference_RPM_rear_wheels.RPM_lx = module * MAX_RPM;
+    reference_CURRENT_rear_wheels.CURRENT_rx = module * map(degree, 0, 90, -1 * MAX_CURRENT, MAX_CURRENT );
+    reference_CURRENT_rear_wheels.CURRENT_lx = module * MAX_CURRENT;
     return;
   }
   if(degree >= 90 && degree <= 180){ //QUADRANT 2 ]90,180]
-      reference_RPM_rear_wheels.RPM_rx = module * MAX_RPM;
-      reference_RPM_rear_wheels.RPM_lx = module * map(degree,180, 90,-1 * MAX_RPM, MAX_RPM);
+      reference_CURRENT_rear_wheels.CURRENT_rx = module * MAX_CURRENT;
+      reference_CURRENT_rear_wheels.CURRENT_lx = module * map(degree,180, 90,-1 * MAX_CURRENT, MAX_CURRENT);
       return;
   }
   if(degree >= -180 && degree <= -90){ //QUADRANT 3 [-180,-90]
-      reference_RPM_rear_wheels.RPM_rx = module * map(degree,-90, -180,-1 * MAX_RPM, MAX_RPM);
-      reference_RPM_rear_wheels.RPM_lx = -1 * module * MAX_RPM;   
+      reference_CURRENT_rear_wheels.CURRENT_rx = module * map(degree,-90, -180,-1 * MAX_CURRENT, MAX_CURRENT);
+      reference_CURRENT_rear_wheels.CURRENT_lx = -1 * module * MAX_CURRENT;   
       return;
   }
   if(degree > -90 && degree < 0){ //QUADRANT 4 [-90,0[
-      reference_RPM_rear_wheels.RPM_rx = -1 * module * MAX_RPM;
-      reference_RPM_rear_wheels.RPM_lx = module * map(degree,0, -90,MAX_RPM, -1 * MAX_RPM);
+      reference_CURRENT_rear_wheels.CURRENT_rx = -1 * module * MAX_CURRENT;
+      reference_CURRENT_rear_wheels.CURRENT_lx = module * map(degree,0, -90,MAX_CURRENT, -1 * MAX_CURRENT);
   }
   
 
 }
 
-int ECU::get_reference_RPM_lx(){
-  return reference_RPM_rear_wheels.RPM_lx;
+int ECU::get_reference_CURRENT_lx(){
+  return reference_CURRENT_rear_wheels.CURRENT_lx;
 }
 
-int ECU::get_reference_RPM_rx(){
-  return reference_RPM_rear_wheels.RPM_rx;
+int ECU::get_reference_CURRENT_rx(){
+  return reference_CURRENT_rear_wheels.CURRENT_rx;
 }*/
 
 void ECU::update_angular_reference_speed_rear_wheels(){
@@ -97,12 +99,12 @@ float ECU::get_reference_linear_speed(){
   return wheelchair_reference_speed.linear;
 }
 
-int ECU::get_reference_RPM_lx(){
-  return reference_RPM_rear_wheels.RPM_lx;
+float ECU::get_reference_CURRENT_lx(){
+  return reference_CURRENT_rear_wheels.CURRENT_lx;
 }
 
-int ECU::get_reference_RPM_rx(){
-  return reference_RPM_rear_wheels.RPM_rx;
+float ECU::get_reference_CURRENT_rx(){
+  return reference_CURRENT_rear_wheels.CURRENT_rx;
 }
 
 void ECU::update_wheelchair_reference_speed(){
@@ -125,21 +127,7 @@ void ECU::update_wheelchair_reference_speed(){
 
 }
 
-void ECU::update_RPM_reference_rear_wheels_old(){
-
-  //From wheelchair_reference_speed to angular_reference_speed_rear_wheels
-  float omega_right = wheelchair_reference_speed.linear / R + (wheelchair_reference_speed.angular * d) / (2 * R);
-  float omega_left = wheelchair_reference_speed.linear / R - (wheelchair_reference_speed.angular * d) / (2 * R);
-
-  //from angular_reference_speed_rear_wheels to reference_RPM_rear_wheels
-
-  //revolutions per minute = radians per second × 9.549297
-  reference_RPM_rear_wheels.RPM_lx = omega_left * 9.549297 * SCALE_RPM_FACTOR;
-  reference_RPM_rear_wheels.RPM_rx = omega_right * 9.549297 * SCALE_RPM_FACTOR;
-
-}
-
-void ECU::update_RPM_reference_rear_wheels(Stability_message &stability_info){
+void ECU::update_CURRENT_reference_rear_wheels(Stability_message &stability_info){
   joystick.update_charthesian_coordinates();
   int degree = joystick.get_discretized_degree();
   float module = joystick.get_module();
@@ -151,39 +139,39 @@ void ECU::update_RPM_reference_rear_wheels(Stability_message &stability_info){
   // float K = 0.5;
 
   // if(degree >= 0 && degree <=90 ){ //QUADRANT 1 [0,90] 
-  //   //angular_speed_rear_wheels.omega_right = module * map(degree, 0, 90, -1 * MAX_RPM, MAX_RPM );
-  //  // angular_speed_rear_wheels.omega_right = module * map(degree, 0, 90, 0, MAX_RPM );
-  //  angular_speed_rear_wheels.omega_right = module * map(degree, 0, 90, -0.5 * MAX_RPM, MAX_RPM );
-  //   angular_speed_rear_wheels.omega_left = module * MAX_RPM;
+  //   //angular_speed_rear_wheels.omega_right = module * map(degree, 0, 90, -1 * MAX_CURRENT, MAX_CURRENT );
+  //  // angular_speed_rear_wheels.omega_right = module * map(degree, 0, 90, 0, MAX_CURRENT );
+  //  angular_speed_rear_wheels.omega_right = module * map(degree, 0, 90, -0.5 * MAX_CURRENT, MAX_CURRENT );
+  //   angular_speed_rear_wheels.omega_left = module * MAX_CURRENT;
 
-  //   // angular_speed_rear_wheels.omega_right = module * (MAX_RPM * (1- (90 - degree) / 90 ) + K * MAX_RPM * ( (90 - degree) / 90 ));
-  //   // angular_speed_rear_wheels.omega_left = module * (MAX_RPM * (1- (90 - degree) / 90 ) - K * MAX_RPM * ( (90 - degree) / 90 ));
+  //   // angular_speed_rear_wheels.omega_right = module * (MAX_CURRENT * (1- (90 - degree) / 90 ) + K * MAX_CURRENT * ( (90 - degree) / 90 ));
+  //   // angular_speed_rear_wheels.omega_left = module * (MAX_CURRENT * (1- (90 - degree) / 90 ) - K * MAX_CURRENT * ( (90 - degree) / 90 ));
   //   //return;
   // }
   // if(degree >= 90 && degree <= 180){ //QUADRANT 2 ]90,180]
-  //     angular_speed_rear_wheels.omega_right = module * MAX_RPM;
-  //     //angular_speed_rear_wheels.omega_left = module * map(degree,180, 90,-1 * MAX_RPM, MAX_RPM);
-  //    // angular_speed_rear_wheels.omega_left = module * map(degree,180, 90,0, MAX_RPM);
-  //    angular_speed_rear_wheels.omega_left = module * map(degree,180, 90,-0.5 * MAX_RPM, MAX_RPM);
+  //     angular_speed_rear_wheels.omega_right = module * MAX_CURRENT;
+  //     //angular_speed_rear_wheels.omega_left = module * map(degree,180, 90,-1 * MAX_CURRENT, MAX_CURRENT);
+  //    // angular_speed_rear_wheels.omega_left = module * map(degree,180, 90,0, MAX_CURRENT);
+  //    angular_speed_rear_wheels.omega_left = module * map(degree,180, 90,-0.5 * MAX_CURRENT, MAX_CURRENT);
 
-  //     // angular_speed_rear_wheels.omega_right = module * (MAX_RPM * ( (180 - degree) / 90 ) + K * MAX_RPM * (1 - (180 - degree) / 90 ));
-  //     // angular_speed_rear_wheels.omega_left = module * (MAX_RPM * ( (180 - degree) / 90 ) - K * MAX_RPM * (1 - (180 - degree) / 90 ));
+  //     // angular_speed_rear_wheels.omega_right = module * (MAX_CURRENT * ( (180 - degree) / 90 ) + K * MAX_CURRENT * (1 - (180 - degree) / 90 ));
+  //     // angular_speed_rear_wheels.omega_left = module * (MAX_CURRENT * ( (180 - degree) / 90 ) - K * MAX_CURRENT * (1 - (180 - degree) / 90 ));
   //     //return;
   // }
   // if(degree >= -180 && degree <= -90){ //QUADRANT 3 [-180,-90]
-  //   //  angular_speed_rear_wheels.omega_right = module * map(degree,-90, -180,-1 * MAX_RPM, MAX_RPM);
-  //   angular_speed_rear_wheels.omega_right = module * map(degree,-90, -180,-1 * MAX_RPM, 0.5*MAX_RPM);
-  //     angular_speed_rear_wheels.omega_left = -1 * module * MAX_RPM;   
-  //     // angular_speed_rear_wheels.omega_right = module * (-1 * MAX_RPM * ( (270 - (360 + degree)) / 90 ) + K * MAX_RPM * (1 - (270 - (360 + degree)) / 90 ));
-  //     // angular_speed_rear_wheels.omega_left = module * (-1 * MAX_RPM * ( (270 - (360 + degree) ) / 90 ) - K * MAX_RPM * (1 - (270 - (360 + degree)) / 90 ));
+  //   //  angular_speed_rear_wheels.omega_right = module * map(degree,-90, -180,-1 * MAX_CURRENT, MAX_CURRENT);
+  //   angular_speed_rear_wheels.omega_right = module * map(degree,-90, -180,-1 * MAX_CURRENT, 0.5*MAX_CURRENT);
+  //     angular_speed_rear_wheels.omega_left = -1 * module * MAX_CURRENT;   
+  //     // angular_speed_rear_wheels.omega_right = module * (-1 * MAX_CURRENT * ( (270 - (360 + degree)) / 90 ) + K * MAX_CURRENT * (1 - (270 - (360 + degree)) / 90 ));
+  //     // angular_speed_rear_wheels.omega_left = module * (-1 * MAX_CURRENT * ( (270 - (360 + degree) ) / 90 ) - K * MAX_CURRENT * (1 - (270 - (360 + degree)) / 90 ));
   //     //return;
   // }
   // if(degree > -90 && degree < 0){ //QUADRANT 4 [-90,0[
-  //     angular_speed_rear_wheels.omega_right = -1 * module * MAX_RPM;
-  //     //angular_speed_rear_wheels.omega_left = module * map(degree,0, -90,MAX_RPM, -1 * MAX_RPM);
-  //     angular_speed_rear_wheels.omega_left = module * map(degree,0, -90,0.5*MAX_RPM, -1 * MAX_RPM);
-  //     // angular_speed_rear_wheels.omega_right = module * (-1 * MAX_RPM * ( (360 - (360 + degree)) / 90 ) - K * MAX_RPM * (1 - (360 - (360 + degree)) / 90 ));
-  //     // angular_speed_rear_wheels.omega_left = module * (-1 * MAX_RPM * ( (360 - (360 + degree) ) / 90 ) + K * MAX_RPM * (1 - (360 - (360 + degree)) / 90 ));
+  //     angular_speed_rear_wheels.omega_right = -1 * module * MAX_CURRENT;
+  //     //angular_speed_rear_wheels.omega_left = module * map(degree,0, -90,MAX_CURRENT, -1 * MAX_CURRENT);
+  //     angular_speed_rear_wheels.omega_left = module * map(degree,0, -90,0.5*MAX_CURRENT, -1 * MAX_CURRENT);
+  //     // angular_speed_rear_wheels.omega_right = module * (-1 * MAX_CURRENT * ( (360 - (360 + degree)) / 90 ) - K * MAX_CURRENT * (1 - (360 - (360 + degree)) / 90 ));
+  //     // angular_speed_rear_wheels.omega_left = module * (-1 * MAX_CURRENT * ( (360 - (360 + degree) ) / 90 ) + K * MAX_CURRENT * (1 - (360 - (360 + degree)) / 90 ));
   // }
 
   float degtorad=PI/180;
@@ -193,52 +181,52 @@ void ECU::update_RPM_reference_rear_wheels(Stability_message &stability_info){
   float klat=0.6;
 
   
-  Serial.printf("acc X %f\n",stability_info.accel_x);
+  //Serial.printf("acc X %f\n",stability_info.accel_x);
   // stability_info.accel_x;
   // stability_info.gyro_x;
   // stability_info.mag_x;
   // stability_info.pitch;
   // stability_info.roll;
 
-  angular_speed_rear_wheels.omega_right = module*(klong*MAX_RPM*sin(degree*degtorad))-module*klat*MAX_RPM*cos(degree*degtorad);
+  angular_speed_rear_wheels.omega_right = module*(klong*MAX_CURRENT*sin(degree*degtorad))-module*klat*MAX_CURRENT*cos(degree*degtorad);
 
-  angular_speed_rear_wheels.omega_left = module*(klong*MAX_RPM*sin(degree*degtorad))+module*klat*MAX_RPM*cos(degree*degtorad);
+  angular_speed_rear_wheels.omega_left = module*(klong*MAX_CURRENT*sin(degree*degtorad))+module*klat*MAX_CURRENT*cos(degree*degtorad);
 
 
   #if DEBUG_LEVEL > 1
-    Serial.printf("RPM_LX -> %f\t RPM_RX -> %f\n",angular_speed_rear_wheels.omega_left,angular_speed_rear_wheels.omega_right);
+    Serial.printf("CURRENT_LX -> %f\t CURRENT_RX -> %f\n",angular_speed_rear_wheels.omega_left,angular_speed_rear_wheels.omega_right);
   #endif
 
 
-  reference_RPM_rear_wheels.RPM_lx = angular_speed_rear_wheels.omega_left;
-  reference_RPM_rear_wheels.RPM_rx = angular_speed_rear_wheels.omega_right;
+  reference_CURRENT_rear_wheels.CURRENT_lx = angular_speed_rear_wheels.omega_left;
+  reference_CURRENT_rear_wheels.CURRENT_rx = angular_speed_rear_wheels.omega_right;
 }
 
 void ECU::set_level_speed_profile(int level){
   switch (level)
   {
   case 1:
-    MAX_RPM = 2000;
+    MAX_CURRENT = 15.0;
     break;
 
   case 2:
-    MAX_RPM = 3000;
+    MAX_CURRENT = 30.0;
     break;
   
   case 3:
-    MAX_RPM = 4000;
+    MAX_CURRENT = 45.0;
     break;
 
   case 4:
-    MAX_RPM = 10000;
+    MAX_CURRENT = 60.0;
     break;
 
   case 5:
-    MAX_RPM = 20000;
+    MAX_CURRENT = 75.0;
     break;
 
   case 6:
-    MAX_RPM = 30000;
+    MAX_CURRENT = 80.0;
     break;
 
   default:

@@ -30,7 +30,7 @@
 //For plotting
 #include "Plotter.h"
 Plotter p; // create plotter
-int RPM_RX_plotting, RPM_LX_plotting;
+int CURRENT_RX_plotting, CURRENT_LX_plotting;
 #endif
 
 // define ECU object
@@ -57,13 +57,15 @@ QueueHandle_t xStability_Info_From_ECU_Queue = NULL;
 SemaphoreHandle_t xSemaphore_mutex_stability_info_updates;
 Stability_message stability_info_updates = {0};
 
+//#define DEBUG_LEVEL 2
+
 // the setup function runs once when you press reset or power the board
 void setup() {
   
   // initialize serial communication at 115200 bits per second:
   #ifdef PLOTTING
   p.Begin(); // start plotter
-  p.AddTimeGraph( "RPM", 4500, "rx", RPM_RX_plotting, "lx", RPM_LX_plotting ); // add any graphs you want
+  p.AddTimeGraph( "RPM", 4500, "rx", CURRENT_RX_plotting, "lx", CURRENT_LX_plotting ); // add any graphs you want
   #else
   Serial.begin(115200);
   #endif
@@ -141,12 +143,12 @@ void setup() {
 
 
   //Initilize Nextion screen
-  if(screen.initialize())
-    Serial.printf("Screen ok");
-  else
-    Serial.printf("Screen FAIL");
+  // if(screen.initialize())
+  //   Serial.printf("Screen ok");
+  // else
+  //   Serial.printf("Screen FAIL");
   
-  screen.attach_listeners();
+  // screen.attach_listeners();
 
 
   // Now set up two tasks to run independently.
@@ -168,14 +170,16 @@ void setup() {
     ,  NULL 
     ,  ARDUINO_RUNNING_CORE);
 
-  xTaskCreatePinnedToCore(
-    TaskHandleScreen
-    ,  "HandleScreen"
-    ,  2048  // Stack size
-    ,  NULL
-    ,  1  // Priority
-    ,  NULL 
-    ,  ARDUINO_RUNNING_CORE);
+  // xTaskCreatePinnedToCore(
+  //   TaskHandleScreen
+  //   ,  "HandleScreen"
+  //   ,  2048  // Stack size
+  //   ,  NULL
+  //   ,  1  // Priority
+  //   ,  NULL 
+  //   ,  ARDUINO_RUNNING_CORE);
+
+
 /*  xTaskCreatePinnedToCore(
     TaskHandleBuzzer
     ,  "HandleBuzzer"
@@ -248,36 +252,36 @@ void TaskHandleJoystick(void *pvParameters)  // This is a task.
       stability_message_received_from_BLE = stability_info_updates;
       xSemaphoreGive( xSemaphore_mutex_stability_info_updates );
 
-      ecu.update_RPM_reference_rear_wheels(stability_message_received_from_BLE);
+      ecu.update_CURRENT_reference_rear_wheels(stability_message_received_from_BLE);
         //ecu.update_wheelchair_reference_speed();
       //float reference_linear_speed = ecu.get_reference_linear_speed();
       //float reference_angular_speed = ecu.get_reference_angular_speed();
 
-        //ecu.update_RPM_reference_rear_wheels_old();
-      int RPM_lx = ecu.get_reference_RPM_lx();
-      int RPM_rx = ecu.get_reference_RPM_rx();
+        //ecu.update_CURRENT_reference_rear_wheels_old();
+      float CURRENT_lx = ecu.get_reference_CURRENT_lx();
+      float CURRENT_rx = ecu.get_reference_CURRENT_rx();
 
       #ifdef PLOTTING
-      RPM_LX_plotting = RPM_lx;
-      RPM_RX_plotting = RPM_rx;
+      CURRENT_LX_plotting = CURRENT_lx;
+      CURRENT_RX_plotting = CURRENT_rx;
       #endif
 
       //Serial.printf("reference_linear_speed %f\t reference_angular_speed%f\n",reference_linear_speed,reference_angular_speed);
 
-      #if DEBUG_LEVEL > 1
-      Serial.printf("RPM_lx %d\t RPM_rx %d\n",RPM_lx,RPM_rx);
-      #endif
+      //#if DEBUG_LEVEL > 1
+      Serial.printf("CURRENT_lx %f\t CURRENT_rx %f\n",CURRENT_lx,CURRENT_rx);
+      //#endif
 
-      RPM_message_sent_on_BLE rpm_sent_on_BLE;
-      rpm_sent_on_BLE.OPCODE = RPM_REFERENCE_OPCODE;
-      rpm_sent_on_BLE.rpm.RPM_LX = RPM_lx;
-      rpm_sent_on_BLE.rpm.RPM_RX = RPM_rx;
+      CURRENT_message_sent_on_BLE current_message_sent_on_BLE;
+      current_message_sent_on_BLE.OPCODE = CURRENT_REFERENCE_OPCODE;
+      current_message_sent_on_BLE.rpm.CURRENT_LX = CURRENT_lx;
+      current_message_sent_on_BLE.rpm.CURRENT_RX = CURRENT_rx;
 
       //Send data via BLE
-      esp_now_send(engineCU_controller_MAC, (uint8_t *) &rpm_sent_on_BLE, sizeof(RPM_message_sent_on_BLE));
+      esp_now_send(engineCU_controller_MAC, (uint8_t *) &current_message_sent_on_BLE, sizeof(CURRENT_message_sent_on_BLE));
 
       //SEND REFERENCE TO wheelchair_ecu via BLE
-      //interfaceEngineCU.set_RPM_motors(RPM_lx,RPM_rx);
+      //interfaceEngineCU.set_RPM_motors(CURRENT_lx,CURRENT_rx);
 
       /*      
       //get velocities from IMU (controller.get_velocities()) e un'altra task con update_velocities (aggiorna i campi che ritornerà get_velocites()) con rate più veloce per oversampling and filtering

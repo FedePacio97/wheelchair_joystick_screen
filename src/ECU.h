@@ -17,7 +17,7 @@ const float OMEGA_MAX_WITHOUT_LIMIT = 400; //rad/s JUST NUMBERS GOT BY EQUATIONS
 const float V_MAX_LIMIT = 12; //m/s 
 const float OMEGA_MAX_LIMIT = 6; //rad/s
 
-const int DEFAULT_MAX_RPM = 1000; //Config param
+const int DEFAULT_MAX_CURRENT = 1000; //Config param
 const int SCALE_RPM_FACTOR = 100; //For scaling up RPM from omega references
 
 struct Angular_speed_rear_wheels{
@@ -28,8 +28,8 @@ struct Wheelchair_reference_speed{ //Reference speed of baricenter G (linear [m/
     float angular,linear;
 };
 
-struct Reference_RPM_rear_wheels{
-  int RPM_lx,RPM_rx;
+struct Reference_CURRENT_rear_wheels{
+  float CURRENT_lx,CURRENT_rx;
 };
 
 
@@ -39,11 +39,12 @@ class ECU {
 
     //Changeble by selecting different profiles
     //Static for convenience: in this way it's changable by Screen even if not direct reference to ECU
-    static int MAX_RPM;
+    //static int MAX_CURRENT;
+    static float MAX_CURRENT;
 
     //To be given to VESCs
-    Reference_RPM_rear_wheels reference_RPM_rear_wheels;
-    //int MAX_RPM;
+    Reference_CURRENT_rear_wheels reference_CURRENT_rear_wheels;
+    //int MAX_CURRENT;
     
     Angular_speed_rear_wheels angular_speed_rear_wheels;
     //Velocity (linear,angular)
@@ -51,12 +52,11 @@ class ECU {
   public:
     ECU(/* variables */);
     void update_wheelchair_reference_speed();
-    void update_RPM_reference_rear_wheels_old();
 
-    void update_RPM_reference_rear_wheels(Stability_message&);
-    //void update_reference_RPM_rear_wheels();
-    int get_reference_RPM_lx();
-    int get_reference_RPM_rx();
+    void update_CURRENT_reference_rear_wheels(Stability_message&);
+    //void update_reference_CURRENT_rear_wheels();
+    float get_reference_CURRENT_lx();
+    float get_reference_CURRENT_rx();
     float get_reference_linear_speed();
     float get_reference_angular_speed();
     static void set_level_speed_profile(int);

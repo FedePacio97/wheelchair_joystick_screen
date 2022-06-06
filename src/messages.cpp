@@ -1,11 +1,12 @@
 #include "messages.h"
 
-#define DEBUG_LEVEL 0
+//#define DEBUG_LEVEL 2
 
 //:::::
 //PISA one
-uint8_t engineCU_controller_MAC[] = {0x7C, 0x9E, 0xBD, 0xF3, 0xB9, 0x10};
-//uint8_t engineCU_controller_MAC[] = {0x30, 0xC6, 0xF7, 0x20, 0x92, 0x98};
+//uint8_t engineCU_controller_MAC[] = {0x7C, 0x9E, 0xBD, 0xF3, 0xB9, 0x10};
+uint8_t engineCU_controller_MAC[] = {0xF0, 0x08, 0xD1, 0xD7, 0x93, 0xDC};
+
 uint8_t joystick_controller_MAC[] = {0x7C, 0x9E, 0xBD, 0x39, 0x25, 0x64};
 
 uint8_t received_OPCODE;
@@ -73,13 +74,13 @@ void OnDataRecvEngineCUController(const uint8_t * mac, const uint8_t *incomingDa
     Serial.printf("Received opcode %d\n",received_OPCODE);
     memcpy(&received_OPCODE, incomingData, sizeof(uint8_t));
     
-    if(received_OPCODE == RPM_REFERENCE_OPCODE){
+    if(received_OPCODE == CURRENT_REFERENCE_OPCODE){
         //extract info
-        RPM_message_sent_on_BLE* rpm_message_on_BLE = (RPM_message_sent_on_BLE*) incomingData;
+        CURRENT_message_sent_on_BLE* rpm_message_on_BLE = (CURRENT_message_sent_on_BLE*) incomingData;
 
         RPM_message rpm_message_received;
-        rpm_message_received.RPM_LX = rpm_message_on_BLE->rpm.RPM_LX;
-        rpm_message_received.RPM_RX = rpm_message_on_BLE->rpm.RPM_RX;
+        rpm_message_received.CURRENT_LX = rpm_message_on_BLE->rpm.CURRENT_LX;
+        rpm_message_received.CURRENT_RX = rpm_message_on_BLE->rpm.CURRENT_RX;
         //send to queue handled by TaskWheelchairMovement
         xQueueSend( // The handle of the queue.
                xRPM_From_Joystick_Queue,
