@@ -242,58 +242,34 @@ void TaskHandleJoystick(void *pvParameters)  // This is a task.
   for (;;)
   {
 
-      //Retrieve stability_message_received_from_BLE
-      //Protect by mutex
-      xSemaphoreTake( xSemaphore_mutex_stability_info_updates, portMAX_DELAY );
-      stability_message_received_from_BLE = stability_info_updates;
-      xSemaphoreGive( xSemaphore_mutex_stability_info_updates );
+    //Retrieve stability_message_received_from_BLE
+    //Protect by mutex
+    xSemaphoreTake( xSemaphore_mutex_stability_info_updates, portMAX_DELAY );
+    stability_message_received_from_BLE = stability_info_updates;
+    xSemaphoreGive( xSemaphore_mutex_stability_info_updates );
 
-      ecu.update_RPM_reference_rear_wheels(stability_message_received_from_BLE);
-        //ecu.update_wheelchair_reference_speed();
-      //float reference_linear_speed = ecu.get_reference_linear_speed();
-      //float reference_angular_speed = ecu.get_reference_angular_speed();
+    ecu.update_RPM_reference_rear_wheels(stability_message_received_from_BLE);
 
-        //ecu.update_RPM_reference_rear_wheels_old();
-      int RPM_lx = ecu.get_reference_RPM_lx();
-      int RPM_rx = ecu.get_reference_RPM_rx();
+    int RPM_lx = ecu.get_reference_RPM_lx();
+    int RPM_rx = ecu.get_reference_RPM_rx();
 
-      #ifdef PLOTTING
-      RPM_LX_plotting = RPM_lx;
-      RPM_RX_plotting = RPM_rx;
-      #endif
+    #ifdef PLOTTING
+    RPM_LX_plotting = RPM_lx;
+    RPM_RX_plotting = RPM_rx;
+    #endif
 
-      //Serial.printf("reference_linear_speed %f\t reference_angular_speed%f\n",reference_linear_speed,reference_angular_speed);
+    #if DEBUG_LEVEL > 1
+    Serial.printf("RPM_lx %d\t RPM_rx %d\n",RPM_lx,RPM_rx);
+    #endif
 
-      #if DEBUG_LEVEL > 1
-      Serial.printf("RPM_lx %d\t RPM_rx %d\n",RPM_lx,RPM_rx);
-      #endif
+    RPM_message_sent_on_BLE rpm_sent_on_BLE;
+    rpm_sent_on_BLE.OPCODE = RPM_REFERENCE_OPCODE;
+    rpm_sent_on_BLE.rpm.RPM_LX = RPM_lx;
+    rpm_sent_on_BLE.rpm.RPM_RX = RPM_rx;
 
-      RPM_message_sent_on_BLE rpm_sent_on_BLE;
-      rpm_sent_on_BLE.OPCODE = RPM_REFERENCE_OPCODE;
-      rpm_sent_on_BLE.rpm.RPM_LX = RPM_lx;
-      rpm_sent_on_BLE.rpm.RPM_RX = RPM_rx;
+    //Send data via BLE
+    esp_now_send(engineCU_controller_MAC, (uint8_t *) &rpm_sent_on_BLE, sizeof(RPM_message_sent_on_BLE));
 
-      //Send data via BLE
-      esp_now_send(engineCU_controller_MAC, (uint8_t *) &rpm_sent_on_BLE, sizeof(RPM_message_sent_on_BLE));
-
-      //SEND REFERENCE TO wheelchair_ecu via BLE
-      //interfaceEngineCU.set_RPM_motors(RPM_lx,RPM_rx);
-
-      /*      
-      //get velocities from IMU (controller.get_velocities()) e un'altra task con update_velocities (aggiorna i campi che ritornerà get_velocites()) con rate più veloce per oversampling and filtering
-      //implementare controllore
-      uint8_t tau_LX = 5, tau_RX = 0;
-
-      //Send to roboteq
-      interfaceEngineCU_ECU.send_tauLX_tauRX(tau_LX,tau_RX);
-
-      */
-
-
-    /*// read the input on analog pin A3:
-    int sensorValueA3 = analogRead(A3);
-    // print out the value you read:
-    Serial.println(sensorValueA3);*/
     vTaskDelay(15/portTICK_PERIOD_MS);  // 50ms delay == 1/(50 * 10^-3) = 100Hz
   }
 }
@@ -336,7 +312,7 @@ void TaskHandleScreen(void *pvParameters)  // This is a task.
         int battery_level = telemetry_message.battery_level;
         screen.set_battery_level(battery_level);
 
-        //TO DO: if negative, not shown (maybe Nextion bug because negative speed correctly received)
+        //TO CHECK: if negative, not shown (maybe Nextion bug because negative speed correctly received)
         int speed = telemetry_message.speed;
         screen.set_speed(speed);
 
@@ -353,14 +329,14 @@ void TaskHandleScreen(void *pvParameters)  // This is a task.
                         0 ) == pdPASS)
       {
         //Send to Screen
-        //#if DEBUG_LEVEL > 1
+        #if DEBUG_LEVEL > 1
         Serial.printf("stability -> pitch %d\n",stability_info.pitch);
         Serial.printf("stability -> roll %d\n",stability_info.roll);
 
         Serial.printf("stability -> accX %f\t accY %f \t accZ %f\n",stability_info.accel_x, stability_info.accel_y, stability_info.accel_z);
         Serial.printf("stability -> gyroX %f\t gyroY %f \t gyroZ %f \n",stability_info.gyro_x, stability_info.gyro_y, stability_info.gyro_z);
         Serial.printf("stability -> magX %f\t magY %f \t magZ %f\n",stability_info.mag_x, stability_info.mag_y, stability_info.mag_z);
-        //#endif
+        #endif
         screen.set_pitch(stability_info.pitch);
         screen.set_roll(stability_info.roll);
 
@@ -468,133 +444,3 @@ void TaskHandleBuzzer(void *pvParameters)  // This is a task.
     }
   }
 }
-
-/*
-void TaskCheckAlivenessEngineCU(void *pvParameters)  // This is a task.
-{
-  (void) pvParameters;
-  
-  
-  TaskCheckAlivenessEngineCU
-  Used to check if within interfaceEngineCU_ECU.KEEP_ALIVE_PERIOD_ms at least a mex has been received from the EngineCU: if not so, something wrong is happening
-  so enable security_stop_procedure
-
-*/  
-/*
-  TickType_t xLastWakeTime;
-  // Initialise the xLastWakeTime variable with the current time.
-  xLastWakeTime = xTaskGetTickCount();
-  for (;;)
-  {
-    // Wait for the next cycle.
-    vTaskDelayUntil( &xLastWakeTime, interfaceEngineCU_ECU.get_KEEP_ALIVE_PERIOD_ms()/portTICK_PERIOD_MS ); //Fixed time execution at KEEP_ALIVE_PERIOD_ms (1000ms by default) rate
-
-    // Perform action here
-
-    if(interfaceEngineCU_ECU.get_received_message_within_keep_alive_period() == true){
-      //Correct behaviour
-      interfaceEngineCU_ECU.reset_received_message_within_keep_alive_period();
-    }else{
-      //Uncorrect behaviour
-
-      //Send a "notification" to the TaskHandleWheelchairMovement
-      //Set ECU_EngineCU_notification
-      xSemaphoreTake( xSemaphore_mutex_ECU_EngineCU_notification, portMAX_DELAY );
-      ECU_EngineCU_notification = EngineCU_DEAD;
-      xSemaphoreGive( xSemaphore_mutex_ECU_EngineCU_notification );
-
-    }
-  }
-}*/
-/*
-void TaskIMUupdates(void *pvParameters)  // This is a task.
-{
-  (void) pvParameters;
-  
-  
-  
-  //TaskIMUupdates
-  //Handles IMU updates and check if pitch and roll are below safe thresholds: if not so, send notification to ECU
-
-
-  TickType_t xLastWakeTime;
-  // Initialise the xLastWakeTime variable with the current time.
-  xLastWakeTime = xTaskGetTickCount();
-  for (;;)
-  {
-    // Wait for the next cycle.
-    vTaskDelayUntil( &xLastWakeTime, 20/portTICK_PERIOD_MS ); //Fixed time execution at KEEP_ALIVE_PERIOD_ms (1000ms by default) rate
-    //May execute at rate of 1/50ms, i.e 20Hz
-
-    // Perform action here
-    imu.updateSensors();
-    uint16_t stability_result = imu.check_stability();
-    if(stability_result == WHEELCHAIR_STABLE){
-      //Correct behaviour
-      Serial.printf("[TaskIMUupdates] Wheelchair is stable!\n");
-    }else{
-      //Uncorrect behaviour
-      //Send a "notification" to the TaskHandleWheelchairMovement
-      //Extract ECU_IMU_notification
-      xSemaphoreTake( xSemaphore_mutex_ECU_IMU_notification, portMAX_DELAY );
-      ECU_IMU_notification = stability_result;
-      xSemaphoreGive( xSemaphore_mutex_ECU_IMU_notification );
-
-    }
-  }
-}*/
-/*
-void TaskCheckConsistencyAmongRPM_IMUvelocity(void *pvParameters)  // This is a task.
-{
-  (void) pvParameters;
-  
-  
-  //TaskCheckConsistencyAmongRPM_IMUvelocity
-  //Used to check if received rpm from EngineCU is consistent with IMU measurements: 
-  //if not so, something wrong is happening so enable security_stop_procedure.
-
-  //E.g: rolling != 0, velocity != while rpm = 0..
-
-  
-
-  TickType_t xLastWakeTime;
-  // Initialise the xLastWakeTime variable with the current time.
-  xLastWakeTime = xTaskGetTickCount();
-
-  uint32_t ulNotifiedValue;
-  for (;;)
-  {
-    // Wait for the next cycle.
-    vTaskDelayUntil( &xLastWakeTime, interfaceEngineCU_ECU.get_CONSISTENCY_CHECKING_PERIOD_ms()/portTICK_PERIOD_MS ); //Fixed time execution at KEEP_ALIVE_PERIOD_ms (1000ms by default) rate
-
-    // Perform action here
-    //Ask for rpm
-    interfaceEngineCU_ECU.request_rpm_motors();
-    //Wait for response
-    //CHECK IF PENDING NOTIFICATION
-    xTaskNotifyWait(
-                      0x00,      // Don't clear any notification bits on entry. 
-                      ULONG_MAX, // Reset the notification value to 0 on exit. 
-                      &ulNotifiedValue, // Notified value pass out in ulNotifiedValue. 
-                      portMAX_DELAY  );  // Block indefinitely. 
-
-    //Whatever ulNotifiedValue is ok, just unblock from Wait()
-
-    //Parse
-    int current_rpm_motor_LX = interfaceEngineCU_ECU.get_rpm_motor_LX();
-    int current_rpm_motor_RX = interfaceEngineCU_ECU.get_rpm_motor_RX();
-
-    Serial.printf("[TaskCheckConsistencyAmongRPM_IMUvelocity] current_rpm_motor_LX -> %d \t current_rpm_motor_RX -> %d\n",current_rpm_motor_LX,current_rpm_motor_RX);
-    //GET IMU VALUES
-  }
-}*/
-
-
-
-
-//TO DO
-/*
-SETUP PER JOYSTICK E AUTOCALIBRATION DURANTE USO SE VEDE CURRENT <> THRESHOLD ..missing
-FREQUENCY JOYSTICK 20 HZ -> v
-APPLY FILTER ON JOYSTICK -> v
-*/

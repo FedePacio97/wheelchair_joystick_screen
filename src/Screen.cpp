@@ -98,67 +98,67 @@ void Screen::set_roll(int angle){
   switch (abs(angle))
   {
     case 0 ... 10:
-      /*if(angle < 0)
+      if(angle < 0)
           roll_image.setPic(ROLL_0_10_NEGATIVE_IMG_ID);
       else
-          roll_image.setPic(ROLL_0_10_POSITIVE_IMG_ID);*/
+          roll_image.setPic(ROLL_0_10_POSITIVE_IMG_ID);
 
       break;
 
     case 11 ... 20:
-      /*if(angle < 0)
+      if(angle < 0)
           roll_image.setPic(ROLL_11_20_NEGATIVE_IMG_ID);
       else
-          roll_image.setPic(ROLL_11_20_POSITIVE_IMG_ID);*/
+          roll_image.setPic(ROLL_11_20_POSITIVE_IMG_ID);
       break;
 
     case 21 ... 30:
-      /*if(angle < 0)
+      if(angle < 0)
           roll_image.setPic(ROLL_21_30_NEGATIVE_IMG_ID);
       else
-          roll_image.setPic(ROLL_21_30_POSITIVE_IMG_ID);*/
+          roll_image.setPic(ROLL_21_30_POSITIVE_IMG_ID);
       break;
 
     case 31 ... 40:
-      /*if(angle < 0)
+      if(angle < 0)
           roll_image.setPic(ROLL_31_40_NEGATIVE_IMG_ID);
       else
-          roll_image.setPic(ROLL_31_40_POSITIVE_IMG_ID);*/
+          roll_image.setPic(ROLL_31_40_POSITIVE_IMG_ID);
       break;
 
     case 41 ... 50:
-      /*if(angle < 0)
+      if(angle < 0)
           roll_image.setPic(ROLL_41_50_NEGATIVE_IMG_ID);
       else
-          roll_image.setPic(ROLL_41_50_POSITIVE_IMG_ID);*/
+          roll_image.setPic(ROLL_41_50_POSITIVE_IMG_ID);
       break;
 
     case 51 ... 60:
-      /*if(angle < 0)
+      if(angle < 0)
           roll_image.setPic(ROLL_51_60_NEGATIVE_IMG_ID);
       else
-          roll_image.setPic(ROLL_51_60_POSITIVE_IMG_ID);*/
+          roll_image.setPic(ROLL_51_60_POSITIVE_IMG_ID);
       break;
 
     case 61 ... 70:
-      /*if(angle < 0)
+      if(angle < 0)
           roll_image.setPic(ROLL_61_70_NEGATIVE_IMG_ID);
       else
-          roll_image.setPic(ROLL_61_70_POSITIVE_IMG_ID);*/
+          roll_image.setPic(ROLL_61_70_POSITIVE_IMG_ID);
       break;
 
     case 71 ... 80:
-      /*if(angle < 0)
+      if(angle < 0)
           roll_image.setPic(ROLL_71_80_NEGATIVE_IMG_ID);
       else
-          roll_image.setPic(ROLL_71_80_POSITIVE_IMG_ID);*/
+          roll_image.setPic(ROLL_71_80_POSITIVE_IMG_ID);
       break;
 
     case 81 ... 90:
-      /*if(angle < 0)
+      if(angle < 0)
           roll_image.setPic(ROLL_81_90_NEGATIVE_IMG_ID);
       else
-          roll_image.setPic(ROLL_81_90_POSITIVE_IMG_ID);*/
+          roll_image.setPic(ROLL_81_90_POSITIVE_IMG_ID);
       break;
 
     default:
@@ -173,67 +173,67 @@ void Screen::set_pitch(int angle){
   switch (abs(angle))
   {
   case 0 ... 10:
-    /*if(angle < 0)
+    if(angle < 0)
       pitch_image.setPic(PITCH_0_10_NEGATIVE_IMG_ID);
     else
-      pitch_image.setPic(PITCH_0_10_POSITIVE_IMG_ID);*/
+      pitch_image.setPic(PITCH_0_10_POSITIVE_IMG_ID);
 
     break;
   
   case 11 ... 20:
-    /*if(angle < 0)
+    if(angle < 0)
       pitch_image.setPic(PITCH_11_20_NEGATIVE_IMG_ID);
     else
-      pitch_image.setPic(PITCH_11_20_POSITIVE_IMG_ID);*/
+      pitch_image.setPic(PITCH_11_20_POSITIVE_IMG_ID);
     break;
 
   case 21 ... 30:
-    /*if(angle < 0)
+    if(angle < 0)
       pitch_image.setPic(PITCH_21_30_NEGATIVE_IMG_ID);
     else
-      pitch_image.setPic(PITCH_21_30_POSITIVE_IMG_ID);*/
+      pitch_image.setPic(PITCH_21_30_POSITIVE_IMG_ID);
     break;
   
   case 31 ... 40:
-    /*if(angle < 0)
+    if(angle < 0)
       pitch_image.setPic(PITCH_31_40_NEGATIVE_IMG_ID);
     else
-      pitch_image.setPic(PITCH_31_40_POSITIVE_IMG_ID);*/
+      pitch_image.setPic(PITCH_31_40_POSITIVE_IMG_ID);
     break;
 
   case 41 ... 50:
-    /*if(angle < 0)
+    if(angle < 0)
       pitch_image.setPic(PITCH_41_50_NEGATIVE_IMG_ID);
     else
-      pitch_image.setPic(PITCH_41_50_POSITIVE_IMG_ID);*/
+      pitch_image.setPic(PITCH_41_50_POSITIVE_IMG_ID);
     break;
 
   case 51 ... 60:
-    /*if(angle < 0)
+    if(angle < 0)
       pitch_image.setPic(PITCH_51_60_NEGATIVE_IMG_ID);
     else
-      pitch_image.setPic(PITCH_51_60_POSITIVE_IMG_ID);*/
+      pitch_image.setPic(PITCH_51_60_POSITIVE_IMG_ID);
     break;
   
   case 61 ... 70:
-    /*if(angle < 0)
+    if(angle < 0)
       pitch_image.setPic(PITCH_61_70_NEGATIVE_IMG_ID);
     else
-      pitch_image.setPic(PITCH_61_70_POSITIVE_IMG_ID);*/
+      pitch_image.setPic(PITCH_61_70_POSITIVE_IMG_ID);
     break;
   
   case 71 ... 80:
-    /*if(angle < 0)
+    if(angle < 0)
       pitch_image.setPic(PITCH_71_80_NEGATIVE_IMG_ID);
     else
-      pitch_image.setPic(PITCH_71_80_POSITIVE_IMG_ID);*/
+      pitch_image.setPic(PITCH_71_80_POSITIVE_IMG_ID);
     break;
   
   case 81 ... 90:
-    /*if(angle < 0)
+    if(angle < 0)
       pitch_image.setPic(PITCH_81_90_NEGATIVE_IMG_ID);
     else
-      pitch_image.setPic(PITCH_81_90_POSITIVE_IMG_ID);*/
+      pitch_image.setPic(PITCH_81_90_POSITIVE_IMG_ID);
     break;
 
   default:

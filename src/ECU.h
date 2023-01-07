@@ -54,7 +54,6 @@ class ECU {
     void update_RPM_reference_rear_wheels_old();
 
     void update_RPM_reference_rear_wheels(Stability_message&);
-    //void update_reference_RPM_rear_wheels();
     int get_reference_RPM_lx();
     int get_reference_RPM_rx();
     float get_reference_linear_speed();
